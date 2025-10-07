@@ -1,13 +1,15 @@
 package com.example.bankingapp.lists
 
 import com.example.bankingapp.controllers.TransactionData
+import com.example.bankingapp.data.Transacoes
+import com.example.bankingapp.db.TransacoesDAO
 
 // Mutable list to store user transactions
 val transactionList: MutableList<TransactionData> = mutableListOf()
 
 
-// Function to add initial generic data (optional, you can also add directly)
-fun populateWithGenericTransactions() {
+// Function to add initial generic data
+suspend fun populateWithGenericTransactions(transacoesDao: TransacoesDAO) {
     transactionList.add(
         TransactionData(
             id = 1,
@@ -52,12 +54,19 @@ fun populateWithGenericTransactions() {
             currency = "R$"
         )
     )
-    // Add more TransactionData objects as needed
+
+
+    for (transaction in transactionList) {
+        transacoesDao.insert(
+            Transacoes(
+                id = transaction.id,
+                description = transaction.description ?: "",
+                idSender = transaction.idSender,
+                idReceiver = transaction.idReceiver,
+                amount = transaction.amount,
+                date = transaction.date,
+                currency = transaction.currency
+            )
+        )
+    }
 }
-
-// You can call this function from somewhere appropriate in your app,
-// for example, when the application starts or when you need to initialize this data.
-// Or, if this list is meant to be globally accessible with initial data,
-// you can populate it directly in an init block or by calling the function here.
-
-// Example of populating it right when this file is loaded (if appropriate for your app structure)

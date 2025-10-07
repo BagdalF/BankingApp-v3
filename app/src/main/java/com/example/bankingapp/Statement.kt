@@ -19,11 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bankingapp.controllers.ProfileData
-import com.example.bankingapp.lists.populateWithGenericProfiles
 import com.example.bankingapp.lists.profileList
 import com.example.bankingapp.lists.transactionList
 
@@ -123,13 +121,4 @@ fun StatementScreen(user: ProfileData?) {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewStatementScreen() {
-    // Exemplo: mostra para o primeiro usuário da lista
-    populateWithGenericProfiles()
-
-    StatementScreen(user = profileList.firstOrNull())
 }

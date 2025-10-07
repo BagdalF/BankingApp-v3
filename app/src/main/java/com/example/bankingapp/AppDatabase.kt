@@ -4,15 +4,18 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.bankingapp.db.FilmesDAO
-import com.example.bankingapp.data.Filmes
+import com.example.bankingapp.db.TransacoesDAO
+import com.example.bankingapp.data.Transacoes
+import com.example.bankingapp.data.Usuarios
+import com.example.bankingapp.db.UsuariosDAO
 
-@Database(entities = [Filmes::class], version = 1)
+@Database(entities = [Transacoes::class, Usuarios::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
 
     // public static AppDatabase INSTANCE = null
 
-    abstract fun filmesDAO(): FilmesDAO
+    abstract fun transacoesDAO(): TransacoesDAO
+    abstract fun usuariosDAO(): UsuariosDAO
 
     companion object {
         @Volatile

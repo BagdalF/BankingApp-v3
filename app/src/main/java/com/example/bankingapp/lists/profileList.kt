@@ -1,14 +1,16 @@
 package com.example.bankingapp.lists
 
 import com.example.bankingapp.controllers.ProfileData
+import com.example.bankingapp.data.Usuarios
+import com.example.bankingapp.db.UsuariosDAO
 
 // Mutable list to store user profiles
 val profileList: MutableList<ProfileData> = mutableListOf()
 
 
-// Function to add initial generic data (optional, you can also add directly)
-fun populateWithGenericProfiles() {
-    profileList.add(
+// Function to add initial generic data
+suspend fun populateWithGenericProfiles(usuariosDao: UsuariosDAO) {
+profileList.add(
         ProfileData(
             id = 1,
             firstName = "a",
@@ -48,12 +50,17 @@ fun populateWithGenericProfiles() {
             password = "123"
         )
     )
-    // Add more ProfileData objects as needed
+
+    for (profile in profileList) {
+        usuariosDao.insert(
+            Usuarios(
+                id = profile.id,
+                firstName = profile.firstName,
+                lastName = profile.lastName,
+                email = profile.email,
+                phone = profile.phone,
+                password = profile.password
+            )
+        )
+    }
 }
-
-// You can call this function from somewhere appropriate in your app,
-// for example, when the application starts or when you need to initialize this data.
-// Or, if this list is meant to be globally accessible with initial data,
-// you can populate it directly in an init block or by calling the function here.
-
-// Example of populating it right when this file is loaded (if appropriate for your app structure)

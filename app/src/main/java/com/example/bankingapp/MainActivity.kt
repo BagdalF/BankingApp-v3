@@ -21,6 +21,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -45,8 +46,15 @@ class BankingAppActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            populateWithGenericProfiles()
-            populateWithGenericTransactions()
+            LaunchedEffect(Unit) {
+                populateWithGenericProfiles(
+                    AppDatabase.getDatabase(applicationContext).usuariosDAO()
+                )
+
+                populateWithGenericTransactions(
+                    AppDatabase.getDatabase(applicationContext).transacoesDAO()
+                )
+            }
             AppNavigation()
         }
     }
