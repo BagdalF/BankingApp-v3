@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.example.bankingapp.data.Usuarios
 
 @Composable
-fun EditProfileScreen(profile: Usuarios, onSaveChanges: (firstName: String, lastName: String, phone: String, email: String) -> Unit) {
+fun EditProfileScreen(profile: Usuarios, onDelete: () -> Unit, onSaveChanges: (firstName: String, lastName: String, phone: String, email: String) -> Unit) {
 
     var firstName by remember { mutableStateOf(profile.firstName) }
     var lastName by remember { mutableStateOf(profile.lastName) }
@@ -103,6 +103,20 @@ fun EditProfileScreen(profile: Usuarios, onSaveChanges: (firstName: String, last
                 )
             ) {
                 Text("Save", color = Color.White, fontSize = 16.sp)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { onDelete() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red
+                )
+            ) {
+                Text("Excluir Conta", color = Color.White, fontSize = 16.sp)
             }
         }
     }

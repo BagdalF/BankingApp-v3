@@ -204,7 +204,16 @@ fun AppNavigation() {
                     )
 
                     currentUser?.let { user ->
-                        EditProfileScreen(user) { firstName, lastName, phone, email ->
+                        EditProfileScreen(profile = user,
+                        onDelete = {
+                            scope.launch {
+                                usuariosDao.delete(user.id)
+                                prefs.user = null
+                                currentUser = null
+                                navController.navigate("login") { popUpTo("login") { inclusive = true } }
+                            }
+                        },
+                        onSaveChanges = {firstName, lastName, phone, email ->
                             scope.launch {
                                 updateUsuario(
                                     id = user.id,
@@ -221,7 +230,7 @@ fun AppNavigation() {
                                     currentUser = updated
                                 }
                             }
-                        }
+                        })
                     }
                 }
             }
