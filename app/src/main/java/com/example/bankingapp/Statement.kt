@@ -14,36 +14,76 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.bankingapp.controllers.ProfileData
-import com.example.bankingapp.lists.profileList
-import com.example.bankingapp.lists.transactionList
+import com.example.bankingapp.controllers.getAllTransacoes
+import com.example.bankingapp.controllers.getAllUsuarios
+import com.example.bankingapp.data.Transacoes
+import com.example.bankingapp.data.Usuarios
+import com.example.bankingapp.db.TransacoesDAO
+import com.example.bankingapp.db.UsuariosDAO
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
-fun StatementScreen(user: ProfileData?) {
-    // Filtra transações onde o usuário é remetente ou destinatário
-    val transactions = remember {
-        if (user == null) emptyList() else
-            transactionList.filter { it.idSender == user.id || it.idReceiver == user.id }
-                .sortedByDescending { it.date }
-    }
+fun StatementScreen(
+    user: Usuarios?,                     // substitui ProfileData
+    usuariosDao: UsuariosDAO,
+    transacoesDao: TransacoesDAO
+) {
+    val coroutineScope = rememberCoroutineScope()
 
-    // Calcula saldo simples (entradas - saídas)
-    val balance = remember {
-        if (user == null) 0.0 else
-            transactions.sumOf {
-                when (user.id) {
-                    it.idReceiver -> it.amount
-                    it.idSender -> -it.amount
-                    else -> 0.0
+    // Lista de transações do usuário
+    var transactions by remember { mutableStateOf<List<Transacoes>>(emptyList()) }
+
+    // Lista de usuários para mapear nomes
+    var usuarios by remember { mutableStateOf<List<Usuarios>>(emptyList()) }
+
+    // Saldo calculado
+    var balance by remember { mutableStateOf(0.0) }
+
+    // Carrega dados do banco quando o composable é exibido
+    LaunchedEffect(user) {
+        if (user != null) {
+            coroutineScope.launch {
+                val loadedTransactions = withContext(Dispatchers.IO) {
+                    getAllTransacoes(transacoesDao)
+                        .filter { it.idSender == user.id || it.idReceiver == user.id }
+                        .sortedByDescending { it.date }
                 }
+
+                val loadedUsuarios = withContext(Dispatchers.IO) {
+                    getAllUsuarios(usuariosDao)
+                }
+
+                val calculatedBalance = loadedTransactions.sumOf { trans ->
+                    when (user.id) {
+                        trans.idReceiver -> trans.amount
+                        trans.idSender -> -trans.amount
+                        else -> 0.0
+                    }
+                }
+
+                transactions = loadedTransactions
+                usuarios = loadedUsuarios
+                balance = calculatedBalance
             }
+        } else {
+            transactions = emptyList()
+            usuarios = emptyList()
+            balance = 0.0
+        }
     }
 
     Column(
@@ -51,6 +91,7 @@ fun StatementScreen(user: ProfileData?) {
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
     ) {
+        // Card de cabeçalho com nome e saldo
         Card(
             modifier = Modifier
                 .padding(16.dp)
@@ -82,18 +123,18 @@ fun StatementScreen(user: ProfileData?) {
             }
         }
 
+        // Lista de transações
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
             items(transactions) { transaction ->
-                // Descobre o outro participante
                 val isSender = transaction.idSender == user?.id
                 val otherId = if (isSender) transaction.idReceiver else transaction.idSender
-                val otherProfile = profileList.find { it.id == otherId }
-                val otherName = if (otherProfile != null)
-                    "${otherProfile.firstName} ${otherProfile.lastName}"
+                val otherUser = usuarios.find { it.id == otherId }
+                val otherName = if (otherUser != null)
+                    "${otherUser.firstName} ${otherUser.lastName}"
                 else "Unknown"
 
                 val amountPrefix = if (isSender) "- " else "+ "
@@ -108,7 +149,7 @@ fun StatementScreen(user: ProfileData?) {
                     Column {
                         Text(transaction.date, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                         Text(otherName, color = Color.Gray, fontSize = 14.sp)
-                        Text(transaction.description ?: "", color = Color.DarkGray, fontSize = 13.sp)
+                        Text(transaction.description, color = Color.DarkGray, fontSize = 13.sp)
                     }
                     Text(
                         amountPrefix + transaction.currency + " %.2f".format(transaction.amount),

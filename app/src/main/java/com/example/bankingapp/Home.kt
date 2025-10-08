@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.bankingapp.controllers.ProfileData
+import com.example.bankingapp.data.Usuarios
 
 // Data class for investment tips
 data class TipInvestment(
@@ -27,7 +27,7 @@ data class TipInvestment(
 )
 
 @Composable
-fun HomeScreen(currentUser: ProfileData?) {
+fun HomeScreen(currentUser: Usuarios) {
 
     val listOfTips = listOf(
         TipInvestment("Seja Bem-vindo!", "Ficamos muitos felizes por ter você conosco!"),
@@ -78,7 +78,7 @@ fun HomeScreen(currentUser: ProfileData?) {
                     )
                 }
                 Text(
-                    "${currentUser?.firstName} ${currentUser?.lastName}",
+                    "${currentUser.firstName} ${currentUser.lastName}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )

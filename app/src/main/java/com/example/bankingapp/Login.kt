@@ -91,11 +91,3 @@ fun LoginScreen(onLogin: (email: String, password: String, errorMessage: () -> U
         Spacer(modifier = Modifier.weight(1f))
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun LoginPreview() {
-//    val context = LocalContext.current
-//    // Dummy NavController for preview
-//    LoginScreen(navController = object : NavController(context) {}, context = context)
-//}

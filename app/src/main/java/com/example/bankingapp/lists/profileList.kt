@@ -1,14 +1,19 @@
 package com.example.bankingapp.lists
 
-import com.example.bankingapp.controllers.ProfileData
 import com.example.bankingapp.data.Usuarios
 import com.example.bankingapp.db.UsuariosDAO
 
-// Mutable list to store user profiles
+data class ProfileData(
+    val id: Int,
+    val firstName: String,
+    val lastName: String,
+    val phone: String,
+    val email: String,
+    val password: String
+)
+
 val profileList: MutableList<ProfileData> = mutableListOf()
 
-
-// Function to add initial generic data
 suspend fun populateWithGenericProfiles(usuariosDao: UsuariosDAO) {
 profileList.add(
         ProfileData(

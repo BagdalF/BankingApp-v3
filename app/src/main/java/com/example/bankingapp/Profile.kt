@@ -26,10 +26,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.bankingapp.controllers.ProfileData
+import com.example.bankingapp.data.Usuarios
 
 @Composable
-fun EditProfileScreen(profile: ProfileData, onSaveChanges: (firstName: String, lastName: String, phone: String, email: String) -> Unit) {
+fun EditProfileScreen(profile: Usuarios, onSaveChanges: (firstName: String, lastName: String, phone: String, email: String) -> Unit) {
 
     var firstName by remember { mutableStateOf(profile.firstName) }
     var lastName by remember { mutableStateOf(profile.lastName) }
@@ -41,10 +41,6 @@ fun EditProfileScreen(profile: ProfileData, onSaveChanges: (firstName: String, l
             .fillMaxSize()
             .background(Color.White)
     ) {
-        //Header(title = "Profile", onIconClick = {})
-
-        //Spacer(modifier = Modifier.height(24.dp))
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
@@ -109,15 +105,5 @@ fun EditProfileScreen(profile: ProfileData, onSaveChanges: (firstName: String, l
                 Text("Save", color = Color.White, fontSize = 16.sp)
             }
         }
-
-        // Spacer(modifier = Modifier.weight(1f))
-
-        // NavBar()
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun EditProfilePreview() {
-//    EditProfileScreen()
-//}

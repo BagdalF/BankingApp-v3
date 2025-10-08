@@ -1,14 +1,20 @@
 package com.example.bankingapp.lists
 
-import com.example.bankingapp.controllers.TransactionData
 import com.example.bankingapp.data.Transacoes
 import com.example.bankingapp.db.TransacoesDAO
 
-// Mutable list to store user transactions
+data class TransactionData(
+    val id: Int,
+    val date: String,
+    val description: String?,
+    val idReceiver: Int,
+    val idSender: Int,
+    val amount: Double,
+    val currency: String
+)
+
 val transactionList: MutableList<TransactionData> = mutableListOf()
 
-
-// Function to add initial generic data
 suspend fun populateWithGenericTransactions(transacoesDao: TransacoesDAO) {
     transactionList.add(
         TransactionData(

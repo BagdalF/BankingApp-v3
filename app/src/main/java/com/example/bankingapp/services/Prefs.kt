@@ -1,27 +1,38 @@
-package com.example.bankingapp.controllers
+package com.example.bankingapp.services
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.bankingapp.lists.profileList
+import com.example.bankingapp.AppDatabase
+import com.example.bankingapp.controllers.getUsuarioById
+import com.example.bankingapp.data.Usuarios
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 
 class PreferencesHelper(context: Context) {
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     private val editor: SharedPreferences.Editor = sharedPreferences.edit()
 
-    var user: ProfileData?
+    private val usuariosDao = AppDatabase.getDatabase(context).usuariosDAO()
+
+    /**
+     * Recupera o usuário logado do banco de dados usando o ID armazenado no SharedPreferences.
+     * Essa operação é síncrona (usa runBlocking), pois Preferences geralmente é acessado em Composables.
+     */
+    var user: Usuarios?
         get() {
             val id = sharedPreferences.getInt(KEY_USER_ID, -1)
-            return if (id == -1) {
-                null
-            } else {
-                profileList.find { it.id == id }
+            if (id == -1) return null
+            return runBlocking(Dispatchers.IO) {
+                getUsuarioById(id, usuariosDao)
             }
         }
         set(value) {
             if (value != null) {
                 editor.putInt(KEY_USER_ID, value.id)
                 editor.apply()
+            } else {
+                removeUser()
             }
         }
 
@@ -33,8 +44,7 @@ class PreferencesHelper(context: Context) {
         }
 
     fun removeUser() {
-        editor.remove(KEY_USER_ID)
-            .apply()
+        editor.remove(KEY_USER_ID).apply()
     }
 
     fun clearAll() {
@@ -47,23 +57,3 @@ class PreferencesHelper(context: Context) {
         private const val KEY_IS_LOGGED = "is_logged"
     }
 }
-
-// Data class for user profile
-data class ProfileData(
-    val id: Int,
-    val firstName: String,
-    val lastName: String,
-    val phone: String,
-    val email: String,
-    val password: String
-)
-
-data class TransactionData(
-    val id: Int,
-    val date: String,
-    val description: String?,
-    val idReceiver: Int,
-    val idSender: Int,
-    val amount: Double,
-    val currency: String
-)
