@@ -165,6 +165,8 @@ fun StatementScreen(
                         )
                         // Ícone de três pontinhos e menu de opções
                         var expanded by remember { mutableStateOf(false) }
+                        var showDateDialog by remember { mutableStateOf(false) }
+                        var newDate by remember { mutableStateOf("") }
                         androidx.compose.material3.IconButton(onClick = { expanded = true }) {
                             androidx.compose.material3.Icon(
                                 imageVector = androidx.compose.material.icons.Icons.Default.MoreVert,
@@ -179,19 +181,8 @@ fun StatementScreen(
                                 androidx.compose.material3.DropdownMenuItem(
                                     text = { Text("Adiar Pagamento") },
                                     onClick = {
-                                        coroutineScope.launch {
-                                            updateTransacao(
-                                                id = transaction.id,
-                                                description = transaction.description,
-                                                idSender = transaction.idSender,
-                                                idReceiver = transaction.idReceiver,
-                                                amount = transaction.amount,
-                                                date = transaction.date,
-                                                currency = transaction.currency,
-                                                transacoesDao = transacoesDao
-                                            )
-                                            expanded = false
-                                        }
+                                        expanded = false
+                                        showDateDialog = true
                                     }
                                 )
                             }
@@ -205,6 +196,43 @@ fun StatementScreen(
                                         )
                                         expanded = false
                                     }
+                                }
+                            )
+                        }
+                        if (showDateDialog) {
+                            androidx.compose.material3.AlertDialog(
+                                onDismissRequest = { showDateDialog = false },
+                                confirmButton = {
+                                    androidx.compose.material3.Button(onClick = {
+                                        coroutineScope.launch {
+                                            updateTransacao(
+                                                id = transaction.id,
+                                                description = transaction.description,
+                                                idSender = transaction.idSender,
+                                                idReceiver = transaction.idReceiver,
+                                                amount = transaction.amount,
+                                                date = newDate,
+                                                currency = transaction.currency,
+                                                transacoesDao = transacoesDao
+                                            )
+                                            showDateDialog = false
+                                        }
+                                    }) {
+                                        Text("Enviar")
+                                    }
+                                },
+                                dismissButton = {
+                                    androidx.compose.material3.TextButton(onClick = { showDateDialog = false }) {
+                                        Text("Cancelar")
+                                    }
+                                },
+                                title = { Text("Adiar Pagamento") },
+                                text = {
+                                    androidx.compose.material3.OutlinedTextField(
+                                        value = newDate,
+                                        onValueChange = { newDate = it },
+                                        label = { Text("Nova data (DD/MM/YYYY)") }
+                                    )
                                 }
                             )
                         }
