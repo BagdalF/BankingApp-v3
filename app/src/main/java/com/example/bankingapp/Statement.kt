@@ -4,11 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -26,8 +29,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.bankingapp.controllers.deleteTransacao
 import com.example.bankingapp.controllers.getAllTransacoes
 import com.example.bankingapp.controllers.getAllUsuarios
+import com.example.bankingapp.controllers.updateTransacao
 import com.example.bankingapp.data.Transacoes
 import com.example.bankingapp.data.Usuarios
 import com.example.bankingapp.db.TransacoesDAO
@@ -38,22 +43,16 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun StatementScreen(
-    user: Usuarios?,                     // substitui ProfileData
+    user: Usuarios?,
     usuariosDao: UsuariosDAO,
     transacoesDao: TransacoesDAO
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    // Lista de transações do usuário
     var transactions by remember { mutableStateOf<List<Transacoes>>(emptyList()) }
-
-    // Lista de usuários para mapear nomes
     var usuarios by remember { mutableStateOf<List<Usuarios>>(emptyList()) }
-
-    // Saldo calculado
     var balance by remember { mutableStateOf(0.0) }
 
-    // Carrega dados do banco quando o composable é exibido
     LaunchedEffect(user) {
         if (user != null) {
             coroutineScope.launch {
@@ -114,12 +113,18 @@ fun StatementScreen(
                     )
                     Text(user?.email ?: "", fontSize = 14.sp, color = Color.Gray)
                 }
-                Text(
-                    "R$ %.2f".format(balance),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = Color(0xFF1976D2)
-                )
+                Row {
+                    Text(
+                        "R$ %.2f".format(balance),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color(0xFF1976D2)
+                    )
+
+                    Spacer(modifier = Modifier.width(24.dp))
+
+                    
+                }
             }
         }
 
@@ -151,12 +156,59 @@ fun StatementScreen(
                         Text(otherName, color = Color.Gray, fontSize = 14.sp)
                         Text(transaction.description, color = Color.DarkGray, fontSize = 13.sp)
                     }
-                    Text(
-                        amountPrefix + transaction.currency + " %.2f".format(transaction.amount),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = amountColor
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            amountPrefix + transaction.currency + " %.2f".format(transaction.amount),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = amountColor
+                        )
+                        // Ícone de três pontinhos e menu de opções
+                        var expanded by remember { mutableStateOf(false) }
+                        androidx.compose.material3.IconButton(onClick = { expanded = true }) {
+                            androidx.compose.material3.Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Default.MoreVert,
+                                contentDescription = "Mais opções"
+                            )
+                        }
+                        androidx.compose.material3.DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            if (isSender) {
+                                androidx.compose.material3.DropdownMenuItem(
+                                    text = { Text("Adiar Pagamento") },
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            updateTransacao(
+                                                id = transaction.id,
+                                                description = transaction.description,
+                                                idSender = transaction.idSender,
+                                                idReceiver = transaction.idReceiver,
+                                                amount = transaction.amount,
+                                                date = transaction.date,
+                                                currency = transaction.currency,
+                                                transacoesDao = transacoesDao
+                                            )
+                                            expanded = false
+                                        }
+                                    }
+                                )
+                            }
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text("Remover Transação") },
+                                onClick = {
+                                    coroutineScope.launch {
+                                        deleteTransacao(
+                                            id = transaction.id,
+                                            transacoesDao = transacoesDao
+                                        )
+                                        expanded = false
+                                    }
+                                }
+                            )
+                        }
+                    }
                 }
                 HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
             }

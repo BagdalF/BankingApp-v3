@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bankingapp.controllers.getAllUsuarios
-import com.example.bankingapp.controllers.insertFilme
+import com.example.bankingapp.controllers.insertTransacao
 import com.example.bankingapp.data.Usuarios
 import com.example.bankingapp.db.TransacoesDAO
 import com.example.bankingapp.db.UsuariosDAO
@@ -31,20 +31,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.LocalDate.now
-import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
 @Composable
 fun TransactionScreen(
-    currentUser: Usuarios?,                 // entidade do Room (substitui ProfileData)
+    currentUser: Usuarios?,
     usuariosDao: UsuariosDAO,
     transacoesDao: TransacoesDAO
 ) {
-    var accolade by remember { mutableStateOf("CF0000-AC") }
-    var name by remember { mutableStateOf("") }
+    var searchLastName by remember { mutableStateOf("CF0000-AC") }
     var amount by remember { mutableStateOf("0.00") }
     var currency by remember { mutableStateOf("R$") }
     var errorMsg by remember { mutableStateOf<String?>(null) }
@@ -67,17 +63,9 @@ fun TransactionScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedTextField(
-                value = accolade,
-                onValueChange = { accolade = it },
-                label = { Text("ACCD / Account number") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Enter name") },
+                value = searchLastName,
+                onValueChange = { searchLastName = it },
+                label = { Text("Search By Last Name") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -107,16 +95,15 @@ fun TransactionScreen(
                         return@Button
                     }
 
-                    // Faz a busca do receiver via DAO/Controller em coroutine
                     coroutineScope.launch {
                         try {
                             val usuarios = withContext(Dispatchers.IO) { getAllUsuarios(usuariosDao) }
 
                             // busca por primeiro nome, último nome ou "nome completo"
                             val receiver = usuarios.find {
-                                it.firstName.equals(name, ignoreCase = true) ||
-                                        it.lastName.equals(name, ignoreCase = true) ||
-                                        "${it.firstName} ${it.lastName}".equals(name, ignoreCase = true)
+                                it.firstName.equals(searchLastName, ignoreCase = true) ||
+                                        it.lastName.equals(searchLastName, ignoreCase = true) ||
+                                        "${it.firstName} ${it.lastName}".equals(searchLastName, ignoreCase = true)
                             }
 
                             if (receiver == null) {
@@ -132,9 +119,8 @@ fun TransactionScreen(
                             val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                             val dateStr = dateFormat.format(Date())
 
-                            // insere a transação via controller (DAO)
                             withContext(Dispatchers.IO) {
-                                insertFilme(
+                                insertTransacao(
                                     description = "Transaction to ${receiver.firstName} ${receiver.lastName}",
                                     idSender = currentUser.id,
                                     idReceiver = receiver.id,
@@ -147,8 +133,7 @@ fun TransactionScreen(
 
                             // atualizar UI no Main
                             successMessage = "Transaction successful!"
-                            accolade = "CF0000-AC"
-                            name = ""
+                            searchLastName = ""
                             amount = "0.00"
                         } catch (e: Exception) {
                             errorMsg = "Transaction failed: ${e.localizedMessage ?: e.message}"

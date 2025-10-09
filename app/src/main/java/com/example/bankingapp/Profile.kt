@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -107,17 +109,51 @@ fun EditProfileScreen(profile: Usuarios, onDelete: () -> Unit, onSaveChanges: (f
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = { onDelete() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Red
-                )
-            ) {
-                Text("Excluir Conta", color = Color.White, fontSize = 16.sp)
-            }
+            DeleteAccountButton(onDelete)
         }
+    }
+}
+
+@Composable
+fun DeleteAccountButton(onDelete: () -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    // Botão que abre o modal
+    Button(
+        onClick = { showDialog = true },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Red
+        )
+    ) {
+        Text("Excluir Conta", color = Color.White, fontSize = 16.sp)
+    }
+
+    // Modal de confirmação
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Tem certeza?") },
+            text = { Text("Essa ação irá excluir permanentemente sua conta. Deseja continuar?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        onDelete()  // Chama a função de exclusão real
+                    }
+                ) {
+                    Text("Sim", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDialog = false }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }

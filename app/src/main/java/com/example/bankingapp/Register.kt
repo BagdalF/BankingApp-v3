@@ -1,7 +1,6 @@
 package com.example.bankingapp
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun LoginScreen(onLogin: (email: String, password: String, errorMessage: () -> Unit) -> Unit, onNavigateRegister: () -> Unit) {
+fun RegisterScreen(onRegister: (firstName: String, lastName: String, email: String, phone: String, password: String, errorMessage: () -> Unit) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -33,7 +32,10 @@ fun LoginScreen(onLogin: (email: String, password: String, errorMessage: () -> U
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
+        var firstName by remember { mutableStateOf("") }
+        var lastName by remember { mutableStateOf("") }
         var email by remember { mutableStateOf("") }
+        var phone by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var errorMessage by remember { mutableStateOf("") }
 
@@ -55,21 +57,43 @@ fun LoginScreen(onLogin: (email: String, password: String, errorMessage: () -> U
                 color = Color.Gray
             )
             Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = firstName,
+                onValueChange = { firstName = it },
+                label = { Text("First name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                label = { Text("Last name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = phone,
+                onValueChange = { phone = it },
+                label = { Text("Phone number") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("E-mail") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                modifier = Modifier.fillMaxWidth()
             )
+
+                Spacer(modifier = Modifier.height(16.dp))
 
             if (errorMessage.isNotEmpty()) {
                 Text(errorMessage, color = Color.Red, fontSize = 14.sp)
@@ -78,7 +102,9 @@ fun LoginScreen(onLogin: (email: String, password: String, errorMessage: () -> U
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { onLogin(email, password) { errorMessage = "Invalid credentials." } },
+                onClick = {
+                    onRegister(firstName, lastName, email, phone, password) { errorMessage = "Invalid credentials." }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -88,12 +114,6 @@ fun LoginScreen(onLogin: (email: String, password: String, errorMessage: () -> U
             ) {
                 Text("Send", color = Color.White, fontSize = 16.sp)
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(text = "Cadastre-se já!", color = Color(0xFF1976D2), modifier = Modifier.clickable {
-                onNavigateRegister()
-            })
         }
         Spacer(modifier = Modifier.weight(1f))
     }

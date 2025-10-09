@@ -22,11 +22,14 @@ suspend fun getUsuarioById(id: Int, usuariosDao: UsuariosDAO): Usuarios? {
     }
 }
 
-suspend fun insertUsuario(firstName: String, lastName: String, email: String, phone: String, password: String, usuariosDao: UsuariosDAO) {
+suspend fun insertUsuario(firstName: String, lastName: String, email: String, phone: String, password: String, usuariosDao: UsuariosDAO) : Usuarios? {
     try {
-        usuariosDao.insert(Usuarios(firstName = firstName, lastName = lastName, email = email, phone = phone, password = password))
+        val novoUsuario = Usuarios(firstName = firstName, lastName = lastName, email = email, phone = phone, password = password)
+        usuariosDao.insert(novoUsuario)
+        return novoUsuario
     } catch (e: Exception) {
         Log.e("Erro ao adicionar", "Msg: ${e.message}")
+        return null
     }
 }
 

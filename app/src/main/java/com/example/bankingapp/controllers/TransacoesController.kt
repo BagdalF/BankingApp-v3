@@ -13,7 +13,7 @@ suspend fun getAllTransacoes(transacoesDao: TransacoesDAO): List<Transacoes> {
     }
 }
 
-suspend fun getFilmeById(id: Int, transacoesDao: TransacoesDAO): Transacoes? {
+suspend fun getTransacaoById(id: Int, transacoesDao: TransacoesDAO): Transacoes? {
     return try {
         transacoesDao.getById(id)
     } catch (e: Exception) {
@@ -22,7 +22,7 @@ suspend fun getFilmeById(id: Int, transacoesDao: TransacoesDAO): Transacoes? {
     }
 }
 
-suspend fun insertFilme(description: String, idSender: Int, idReceiver: Int, amount: Double, date: String, currency: String, transacoesDao: TransacoesDAO) {
+suspend fun insertTransacao(description: String, idSender: Int, idReceiver: Int, amount: Double, date: String, currency: String, transacoesDao: TransacoesDAO) {
     try {
         transacoesDao.insert(Transacoes(description = description, idSender = idSender, idReceiver = idReceiver, amount = amount, date = date, currency = currency))
     } catch (e: Exception) {
@@ -30,7 +30,7 @@ suspend fun insertFilme(description: String, idSender: Int, idReceiver: Int, amo
     }
 }
 
-suspend fun deleteFilme(id: Int, transacoesDao: TransacoesDAO) {
+suspend fun deleteTransacao(id: Int, transacoesDao: TransacoesDAO) {
     try {
         transacoesDao.delete(id)
     } catch (e: Exception) {
@@ -38,7 +38,7 @@ suspend fun deleteFilme(id: Int, transacoesDao: TransacoesDAO) {
     }
 }
 
-suspend fun updateFilme(id: Int, description: String, idSender: Int, idReceiver: Int, amount: Double, date: String, currency: String, transacoesDao: TransacoesDAO) {
+suspend fun updateTransacao(id: Int, description: String, idSender: Int, idReceiver: Int, amount: Double, date: String, currency: String, transacoesDao: TransacoesDAO) {
     try {
         transacoesDao.update(Transacoes(id = id, description = description, idSender = idSender, idReceiver = idReceiver, amount = amount, date = date, currency = currency))
     } catch (e: Exception) {

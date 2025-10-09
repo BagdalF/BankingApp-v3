@@ -37,8 +37,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.bankingapp.components.Header
+import com.example.bankingapp.controllers.deleteUsuario
 import com.example.bankingapp.controllers.getAllUsuarios
 import com.example.bankingapp.controllers.getUsuarioById
+import com.example.bankingapp.controllers.insertUsuario
 import com.example.bankingapp.controllers.updateUsuario
 import com.example.bankingapp.services.PreferencesHelper
 import com.example.bankingapp.lists.populateWithGenericProfiles
@@ -98,7 +100,7 @@ fun AppNavigation() {
             Header(title = "Login")
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 Column(modifier = Modifier.padding(innerPadding)) {
-                    LoginScreen { email, password, errorMessage ->
+                    LoginScreen (onLogin = { email, password, errorMessage ->
                         scope.launch {
                             val usuarios = getAllUsuarios(usuariosDao)
                             val user = usuarios.find { it.email == email && it.password == password }
@@ -111,6 +113,45 @@ fun AppNavigation() {
                                 }
                                 Toast.makeText(context, "Logged Successfully!", Toast.LENGTH_SHORT).show()
                             } else {
+                                errorMessage()
+                            }
+                        }
+                    }, onNavigateRegister = {
+                        navController.navigate("register")
+                    })
+                }
+            }
+        }
+
+        // ========================= REGISTER =========================
+        composable("register") {
+            Header(title = "Create Your Account")
+            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Column(modifier = Modifier.padding(innerPadding)) {
+                    RegisterScreen { firstName, lastName, email, phone, password, errorMessage ->
+                        scope.launch {
+                            try {
+                                val novoUsuario = insertUsuario(
+                                    firstName = firstName,
+                                    lastName = lastName,
+                                    email = email,
+                                    phone = phone,
+                                    password = password,
+                                    usuariosDao = usuariosDao
+                                )
+
+                                if (novoUsuario == null) {
+                                    throw Exception("Erro ao criar usuário")
+                                }
+
+                                prefs.user = novoUsuario
+                                prefs.isLogged = true
+                                currentUser = novoUsuario
+                                navController.navigate("home/${novoUsuario.id}") {
+                                    popUpTo("home/${novoUsuario.id}") { inclusive = true }
+                                }
+                                Toast.makeText(context, "Logged Successfully!", Toast.LENGTH_SHORT).show()
+                            } catch (e: Exception) {
                                 errorMessage()
                             }
                         }
@@ -207,7 +248,7 @@ fun AppNavigation() {
                         EditProfileScreen(profile = user,
                         onDelete = {
                             scope.launch {
-                                usuariosDao.delete(user.id)
+                                deleteUsuario(user.id, usuariosDao)
                                 prefs.user = null
                                 currentUser = null
                                 navController.navigate("login") { popUpTo("login") { inclusive = true } }
